@@ -10,3 +10,4 @@ rules:
   line-length:
     ignore: |
       .github/**
+      action.yml
