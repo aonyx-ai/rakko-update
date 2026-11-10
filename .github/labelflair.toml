@@ -1,0 +1,36 @@
+# See https://github.com/jdno/labelflair for the documentation of Labelflair.
+
+[[group]]
+prefix = "C-"
+colors = { tailwind = "red" }
+labels = [
+  { name = "bug", description = "Report a new bug" },
+  { name = "dependency", description = "Change or update a dependency" },
+  { name = "documentation", description = "Improve the documentation" },
+  { name = "feature", description = "Request a new feature", aliases = [
+    "feature-request",
+  ] },
+]
+
+[[group]]
+prefix = "M-"
+colors = { tailwind = "violet" }
+labels = [
+  { name = "prototype", description = "A decision ticket that a prototype resolves" },
+  { name = "question", description = "A decision ticket that a conversation resolves" },
+  { name = "research", description = "A decision ticket that research resolves" },
+  { name = "task", description = "A decision ticket for manual work that unblocks a decision" },
+]
+
+[[group]]
+prefix = "R-"
+colors = { tailwind = "slate" }
+labels = [
+  { name = "added", description = "Add a new feature to the release notes" },
+  { name = "changed", description = "Add a change in existing functionality to the release notes" },
+  { name = "deprecated", description = "Add a soon-to-be removed feature to the release notes" },
+  { name = "fixed", description = "Add a fixed bug to the release notes" },
+  { name = "ignore", description = "Do not add this pull request to the release notes" },
+  { name = "removed", description = "Add a now removed feature to the release notes" },
+  { name = "security", description = "Add a vulnerability warning to the release notes" },
+]

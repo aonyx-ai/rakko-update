@@ -1,0 +1,6 @@
+---
+# Long lines inside a code block or table cannot always wrap: a shell command
+# or a table cell has to stay on one line. Prose still wraps at 80.
+MD013:
+  code_blocks: false
+  tables: false

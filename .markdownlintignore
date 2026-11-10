@@ -1,0 +1,10 @@
+.claude/worktrees/
+target/
+
+# The file only imports AGENTS.md, and holds no heading of its own.
+CLAUDE.md
+
+# GitHub renders an issue template below the title of the issue, so a template
+# starts at the second level of headings, and each hint is one comment on one
+# line that the author of the issue replaces.
+.github/ISSUE_TEMPLATE/

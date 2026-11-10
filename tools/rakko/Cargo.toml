@@ -1,0 +1,33 @@
+[package]
+name = "harness"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+# The binary is named `rakko`, so that it reads well on the command line.
+[[bin]]
+name = "rakko"
+path = "src/main.rs"
+
+[dependencies]
+# Rakko's crates carry no version, so that Renovate follows its default branch
+# and updates `Cargo.lock` with the new rev.
+rakko-action = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-baseline = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-cli = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-format-json = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-format-markdown = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-format-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-format-toml = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-format-yaml = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-lint-github-actions = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-lint-markdown = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-lint-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-lint-toml = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-lint-yaml = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-pre-commit = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-rust-binary = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+rakko-test-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "5a388524311b77bb49492ade4575238d7358949f" }
+
+[lints]
+workspace = true

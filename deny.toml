@@ -1,0 +1,23 @@
+[licenses]
+# Add a license here when a dependency needs it, and only when it is OSI- or
+# FSF-approved.
+allow = ["Apache-2.0", "MIT", "MPL-2.0", "Unicode-3.0"]
+
+[licenses.private]
+# The harness is never published and carries no license expression of its own.
+ignore = true
+
+[bans]
+# Two versions of one crate build and link both, which grows the binary and
+# can split a type across the versions. It is a warning, because a duplicate
+# often comes from a transitive dependency that the workspace cannot control.
+multiple-versions = "warn"
+
+# A wildcard requirement accepts any future release, including one with a
+# breaking change, so a build that works today can break without a noticeable
+# change here.
+wildcards = "deny"
+
+# Rakko's crates are pulled in as Git dependencies using their rev until we
+# publish them to crates.io.
+allow-wildcard-paths = true

@@ -1,0 +1,118 @@
+---
+name: Continuous Integration
+
+"on":
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commands:
+    name: Enumerate the commands
+    runs-on: [self-hosted, linux, ARM64]
+
+    permissions:
+      contents: read
+
+    outputs:
+      commands: ${{ steps.export-commands.outputs.commands }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The setup cleans the tree itself, and keeps the build output that
+          # an earlier job left on a persistent self-hosted runner.
+          clean: false
+          persist-credentials: false
+
+      - name: Set up the tools
+        uses: $/.github/actions/setup
+
+      # The help of the harness lists what this repository mounts, so an
+      # action that the harness gains reaches CI without a change to this
+      # file. The prefix picks the commands that a job runs: `pre-commit`
+      # drives the actions that the job below already runs one by one, and
+      # `help` is not a check. A written command that is a check therefore
+      # has to carry one of these prefixes to reach CI.
+      #
+      # The help is text that clap lays out, and a release of clap may lay it
+      # out differently. An empty list would skip the whole matrix and read as
+      # a pull request that has nothing to run, so an empty one fails here.
+      - name: Export the commands
+        id: export-commands
+        run: |
+          listed=$(mise run rakko -- --help |
+            awk '/^Commands:/ { list = 1; next }
+                 /^$/         { list = 0 }
+                 list && /^  (build|check|format|lint|test)-/ { print $1 }')
+
+          if [ -z "${listed}" ]; then
+            echo "The help of the harness listed no command to run." >&2
+            exit 1
+          fi
+
+          commands=$(jq --compact-output --null-input --raw-input '[inputs]' <<< "${listed}")
+
+          echo "commands=${commands}" >> "$GITHUB_OUTPUT"
+
+  checks:
+    name: ${{ matrix.command }}
+    runs-on: [self-hosted, linux, ARM64]
+
+    permissions:
+      contents: read
+
+    needs: commands
+
+    strategy:
+      fail-fast: false
+      matrix:
+        command: ${{ fromJson(needs.commands.outputs.commands) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The setup cleans the tree itself, and keeps the build output that
+          # an earlier job left on a persistent self-hosted runner.
+          clean: false
+          persist-credentials: false
+
+      - name: Set up the tools
+        uses: $/.github/actions/setup
+
+      # The task hands every argument to the harness untouched, and the harness
+      # is what a contributor runs as well, so a job of CI and a machine of a
+      # contributor answer the same question with the same command.
+      - name: Run the command
+        # Zizmor resolves action pins against the GitHub API, and it skips
+        # those audits silently when it finds no token, so `lint-github-actions`
+        # would pass while auditing less than it reports. The token is granted
+        # to every command rather than to that one alone, so that renaming a
+        # command cannot quietly take the audits away again.
+        env:
+          COMMAND: ${{ matrix.command }}
+          GH_TOKEN: ${{ github.token }}
+        run: mise run rakko -- "$COMMAND"
+
+  success:
+    name: All checks succeeded
+    runs-on: [self-hosted, linux, ARM64]
+
+    permissions: {}
+
+    needs: checks
+    if: always()
+
+    steps:
+      - name: Check if all checks succeeded
+        # `needs` is a list of job names, which themselves are generated from
+        # the help of the harness, so we ignore the template injection here.
+        # zizmor: ignore[template-injection]
+        run: jq --exit-status 'all(.result == "success")' <<< '${{ toJson(needs) }}'
