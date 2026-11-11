@@ -1,9 +1,18 @@
-# Template Repository
+# Rakko Update
 
-This repository is the template that new repositories of Aonyx start from. It
-holds no product code. It carries the configuration, the tooling, and the
-conventions that every repository shares. A repository that grows out of the
-template replaces this section with a description of its own project.
+This repository holds a GitHub Action and a preset for Renovate. The action
+updates the tool pins of [Rakko] in the pull requests of an update bot.
+
+- `action.yml` is the action. GitHub Marketplace lists only an action whose
+  metadata file is at the root of its repository, so the file stays there.
+- `default.json` is the preset. It extends the preset of Rakko, and it lists
+  the identity of the commits of the action in `gitIgnoredAuthors`. A change
+  to that identity changes both files.
+- `README.md` is the documentation of the action for its users.
+
+The only contract of the action with Rakko is the command
+`mise run rakko -- doctor --fix`. Rakko records why the action exists, and why
+it has a repository of its own, in its ADR-023.
 
 ## Engineering
 

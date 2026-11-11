@@ -1,0 +1,6 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Keep Renovate off the tool pins that Rakko generates, and let Renovate continue on a branch after a commit of the action aonyx-ai/rakko-update. Renovate does not update a branch that holds a commit of another author, unless the author is in `gitIgnoredAuthors`. The action commits with the identity below.",
+  "extends": ["github>aonyx-ai/rakko"],
+  "gitIgnoredAuthors": ["41898282+github-actions[bot]@users.noreply.github.com"]
+}
