@@ -14,7 +14,7 @@ An update of Rakko can change a declared tool. The two files then no longer
 match the mounted actions. Rakko then stops every command except the help and
 `doctor`, until `doctor --fix` writes the files again.
 
-This action does that repair for you, in the pull request of an update bot:
+This action updates the tool pins for you, in the pull request of an update bot:
 
 1. It runs `mise run rakko -- doctor --fix` on the branch of the pull request.
 2. It commits the changed files to the same branch.
@@ -32,14 +32,14 @@ The update and its tool pins then arrive in one pull request.
   nothing until the bot makes the last commit of the branch again.
 - When the bot rebases its branch, the rebase removes the commit of the action.
   The action then commits again.
-- When `doctor --fix` cannot repair the project, the action fails and pushes
+- When `doctor --fix` cannot update the tool pins, the action fails and pushes
   nothing. The checks of the pull request then fail. For example, an action of
   Rakko can need a newer toolchain than the project pins. The output of
   `doctor` says which pin to change.
 
 ### The Bots
 
-The action repairs a pull request only when all of these are true:
+The action updates a pull request only when all of these are true:
 
 - An account in its list of bots opened the pull request.
 - The branch of the pull request is in the same repository. So the action
@@ -51,7 +51,7 @@ The list always holds `renovate[bot]` and `dependabot[bot]`. To add the account
 of another bot, use the input `bots`. Write one login on each line:
 
 ```yaml
-- name: Repair the tool pins
+- name: Update the tool pins
   uses: aonyx-ai/rakko-update@<commit> # main
   with:
     bots: |
@@ -66,8 +66,8 @@ accounts. When the account of the pull request or of its last commit is not in
 the list, the notice of the action gives that login.
 
 The commits of the action come from `github-actions[bot]`, which is not in the
-list. So after a repair, the action changes nothing until the bot updates its
-branch again.
+list. So after its own commit, the action changes nothing until the bot
+updates its branch again.
 
 ## Usage
 
@@ -81,7 +81,7 @@ Add a workflow, for example `.github/workflows/rakko-update.yml`:
 
 ```yaml
 ---
-name: Rakko Update
+name: Rakko
 
 "on":
   pull_request:
@@ -93,15 +93,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  repair:
-    name: Repair the tool pins
+  update:
+    name: Update the tool pins
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
-      - name: Repair the tool pins
+      - name: Update the tool pins
         uses: aonyx-ai/rakko-update@<commit> # main
 ```
 
@@ -142,7 +142,7 @@ holds `[dependabot skip]`. Dependabot then continues to rebase its branch.
 ## The Credential
 
 The input `token` is the credential that checks out the branch and pushes the
-repair. The default is the token of the workflow.
+updated tool pins. The default is the token of the workflow.
 
 | Credential                | Setup                         | CI on the commit of the action        |
 | ------------------------- | ----------------------------- | ------------------------------------- |
@@ -168,7 +168,7 @@ steps:
       app-id: ${{ vars.RAKKO_UPDATE_APP_ID }}
       private-key: ${{ secrets.RAKKO_UPDATE_PRIVATE_KEY }}
 
-  - name: Repair the tool pins
+  - name: Update the tool pins
     uses: aonyx-ai/rakko-update@<commit> # main
     with:
       token: ${{ steps.app-token.outputs.token }}

@@ -1,6 +1,6 @@
 ---
-name: Rakko Update
-description: Repair the tool pins of Rakko in the pull requests of an update bot
+name: Rakko
+description: Update the tool pins of Rakko in the pull requests of an update bot
 author: Aonyx
 
 branding:
@@ -10,26 +10,26 @@ branding:
 # An update of Rakko can change the tools that the mounted actions declare.
 # Rakko then stops every command of the harness except the help and `doctor`,
 # until `doctor --fix` writes the tool pins of the project again. This action
-# runs that repair in the pull request of an update bot. It commits the result
-# to the branch of the pull request, so the update and its tool pins arrive
-# together. Its only contract with Rakko is the command
+# updates the tool pins in the pull request of an update bot. It commits the
+# result to the branch of the pull request, so the update and its tool pins
+# arrive together. Its only contract with Rakko is the command
 # `mise run rakko -- doctor --fix`.
 
 inputs:
   token:
     description: >-
       The credential that checks out the branch of the pull request and pushes
-      the repair. With the token of the workflow, GitHub runs no CI on the
-      commit until a person approves the run. The token of a GitHub App or a
-      personal access token starts CI without a person.
+      the updated tool pins. With the token of the workflow, GitHub runs no CI
+      on the commit until a person approves the run. The token of a GitHub App
+      or a personal access token starts CI without a person.
     required: false
     default: ${{ github.token }}
   bots:
     description: >-
-      More accounts of bots whose pull requests the action repairs, one login
+      More accounts of bots whose pull requests the action updates, one login
       per line, such as the account of a self-hosted Renovate. A bot can open
       the pull request with one account and write its commits with another.
-      Then list both accounts. The action always repairs the pull requests of
+      Then list both accounts. The action always updates the pull requests of
       renovate[bot] and dependabot[bot].
     required: false
     default: ""
@@ -44,7 +44,7 @@ runs:
     # does not push to a branch where a person pushed a commit of their own.
     # The commit of the action carries an identity outside the list, so the
     # run that its push starts commits nothing again.
-    - name: Decide whether to repair the pull request
+    - name: Decide whether to update the pull request
       id: decide
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       env:
@@ -61,13 +61,13 @@ runs:
           const pullRequest = context.payload.pull_request;
 
           if (!pullRequest) {
-            core.setFailed("The action repairs a pull request, so a workflow runs it on the event of a pull request.");
+            core.setFailed("The action updates a pull request, so a workflow runs it on the event of a pull request.");
             return;
           }
 
           const skip = (reason) => {
-            core.notice(`${reason} If Rakko stops on the tool pins, run \`mise run rakko -- doctor --fix\` and commit the changed files.`);
-            core.setOutput("repair", "false");
+            core.notice(`${reason} To update the tool pins of Rakko yourself, run \`mise run rakko -- doctor --fix\` and commit the changed files.`);
+            core.setOutput("update", "false");
           };
 
           if (!bots.has(pullRequest.user.login)) {
@@ -90,8 +90,8 @@ runs:
           const author = commit.author?.login;
 
           if (author === "github-actions[bot]") {
-            core.info("The last commit of the branch comes from github-actions[bot], such as an earlier repair of the action, so the action changes nothing.");
-            core.setOutput("repair", "false");
+            core.info("The last commit of the branch comes from github-actions[bot], such as an earlier update of the action, so the action changes nothing.");
+            core.setOutput("update", "false");
             return;
           }
 
@@ -100,7 +100,7 @@ runs:
             return;
           }
 
-          core.setOutput("repair", "true");
+          core.setOutput("update", "true");
 
     # The checkout takes the commit that the decision above looked at, so the
     # push only extends that commit and fails when the branch has moved. The
@@ -108,7 +108,7 @@ runs:
     # because the next steps run the harness of the update. The push gives the
     # credential to Git on its own command line.
     - name: Check out the branch of the pull request
-      if: steps.decide.outputs.repair == 'true'
+      if: steps.decide.outputs.update == 'true'
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ github.event.pull_request.head.sha }}
@@ -116,7 +116,7 @@ runs:
         persist-credentials: false
 
     - name: Install the tools
-      if: steps.decide.outputs.repair == 'true'
+      if: steps.decide.outputs.update == 'true'
       uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
       # Mise reads `GITHUB_TOKEN` when it asks the API of GitHub for the
       # releases of a tool. Without a token, these calls can run into the rate
@@ -132,16 +132,16 @@ runs:
     # The harness fails the step when a problem remains that it cannot
     # repair, such as a toolchain outside the range of an action. The action
     # then pushes nothing, and the pull request stays red.
-    - name: Repair the tool pins
-      if: steps.decide.outputs.repair == 'true'
+    - name: Update the tool pins
+      if: steps.decide.outputs.update == 'true'
       shell: bash
       run: mise run rakko -- doctor --fix
 
     # The commit carries one fixed identity. The preset of this repository
     # tells Renovate to ignore that identity, so Renovate continues to rebase
     # its branch. `[dependabot skip]` makes Dependabot do the same.
-    - name: Commit and push the repair
-      if: steps.decide.outputs.repair == 'true'
+    - name: Commit and push the tool pins
+      if: steps.decide.outputs.update == 'true'
       shell: bash
       env:
         BRANCH: ${{ github.event.pull_request.head.ref }}
@@ -158,7 +158,7 @@ runs:
         git -c user.name='github-actions[bot]' \
             -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
             commit --quiet --no-verify --file - <<'EOF'
-        Regenerate the tool pins of Rakko
+        Update the tool pins of Rakko
 
         The update changed the tools that the mounted actions declare, so
         `mise run rakko -- doctor --fix` wrote the tool pins of the project

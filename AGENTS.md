@@ -1,7 +1,7 @@
 # Rakko Update
 
 This repository holds a GitHub Action and a preset for Renovate. The action
-repairs the tool pins of [Rakko] in the pull requests of an update bot.
+updates the tool pins of [Rakko] in the pull requests of an update bot.
 
 - `action.yml` is the action. GitHub Marketplace lists only an action whose
   metadata file is at the root of its repository, so the file stays there.
