@@ -66,7 +66,7 @@ runs:
           }
 
           const skip = (reason) => {
-            core.notice(`${reason} To update the tool pins of Rakko yourself, run \`mise run rakko -- doctor --fix\` and commit the changed files.`);
+            core.notice(`${reason} When Rakko asks for new tool pins, run \`mise run rakko -- doctor --fix\` and commit the changed files.`);
             core.setOutput("update", "false");
           };
 
