@@ -89,7 +89,7 @@ name: Rakko
 permissions: {}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: rakko-update-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
