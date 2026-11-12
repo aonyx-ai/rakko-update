@@ -113,6 +113,40 @@ commit on `main`. Keep the comment `# main` after the hash. Renovate moves a
 pinned commit only when such a comment gives the branch or the tag that it
 follows.
 
+### The Lockfile
+
+When the project has a mise lockfile, the action runs `mise install --locked`
+before `doctor --fix`. This command installs every tool that mise pins for the
+project, and not only the tools that `doctor --fix` uses.
+
+The runner is the machine that runs the job. Its platform identifies the
+operating system and processor architecture, such as `linux-x64`. Every tool
+needs a version recorded in the lockfile. For a tool whose download URL mise
+records in the lockfile, such as jq, the lockfile also needs a URL and checksum
+for the platform of the runner. If the version, the URL, or the checksum is
+missing, the install fails before `doctor --fix` runs.
+
+Set `lockfile_platforms` in the `mise.toml` of the project to list the platforms
+of the machines that run the tools. The workflow above uses `ubuntu-latest`,
+which needs `linux-x64`. This example also covers contributors who use
+`macos-arm64`:
+
+```toml
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-x64", "macos-arm64"]
+```
+
+When `lockfile_platforms` is set, `mise lock` writes entries for the listed
+platforms and for the platform of its machine. It also removes the entries for
+other platforms. So when the list holds the platform of the runner, `mise lock`
+on another machine keeps the entries for the runner. If the setting is unset,
+mise preserves the platforms already in the lockfile. The [mise lockfile
+documentation][mise-lockfile] describes the entries of each platform.
+
+After you change the list, run `mise lock` from the project directory. Then
+commit the changed configuration and the lockfile.
+
 ### Permissions
 
 The action pushes with the token of the workflow, so the job needs
@@ -142,18 +176,24 @@ holds `[dependabot skip]`. Dependabot then continues to rebase its branch.
 ## The Credential
 
 The input `token` is the credential that checks out the branch and pushes the
-updated tool pins. The default is the token of the workflow.
+updated tool pins. The default is the token of the workflow, `GITHUB_TOKEN`.
 
-| Credential                | Setup                         | CI on the commit of the action        |
-| ------------------------- | ----------------------------- | ------------------------------------- |
-| The token of the workflow | None                          | Waits until a person approves the run |
-| The token of a GitHub App | An app, its key, and a secret | Starts without a person               |
-| A personal access token   | A token and a secret          | Starts without a person               |
+| Credential                | Setup                         | Pull Request Workflows                  |
+| ------------------------- | ----------------------------- | --------------------------------------- |
+| The token of the workflow | None                          | Waits for one approval per workflow run |
+| The token of a GitHub App | An app, its key, and a secret | Starts without a person                 |
+| A personal access token   | A token and a secret          | Starts without a person                 |
 
-Start with the token of the workflow. GitHub does not run CI on a push with
-that token until a person with write access approves the run with one click.
-Each rebase of the branch needs another click. A project whose updates merge
-themselves when CI passes then waits for that click.
+Start with the token of the workflow. A push with that token causes a
+`pull_request` event of the type `synchronize`. For workflows that run on this
+event, GitHub [requires approval][github-token-workflows] from a person with
+write access. Each workflow run needs its own approval. Three such workflows
+therefore need three approvals for each commit of the action. A push with this
+token starts no workflow that runs only on `push`.
+
+When the bot rebases its branch, it removes the commit of the action. The
+action commits again, and the new workflow runs need approval again. A project
+that merges updates when CI passes then waits for these approvals.
 
 For updates that need no person, use the token of a GitHub App. The app needs
 write access to the contents of the repository. Create a token for the app in
@@ -208,6 +248,8 @@ directory of the repository.
 `pre-commit install` installs the Git hook, which runs
 `rakko pre-commit --fix` before every commit.
 
+[github-token-workflows]: https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow
 [mise]: https://mise.jdx.dev
 [mise-activate]: https://mise.jdx.dev/getting-started.html#activate-mise
+[mise-lockfile]: https://mise.jdx.dev/dev-tools/mise-lock.html#preparing-platform-entries
 [rakko]: https://github.com/aonyx-ai/rakko
