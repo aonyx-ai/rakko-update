@@ -223,12 +223,16 @@ default branch. Then the credential cannot push to the default branch.
 
 ## Development
 
-[Mise] provisions every tool that this repository needs, at the versions that
-`mise.toml` pins:
+[Mise] provisions every tool that this repository needs:
 
 ```console
 mise install
 ```
+
+`mise.toml` pins the toolchains, such as Rust and Node.js, and the tools that
+no action declares. Each action of the harness declares the tools that it
+runs, and `mise run rakko -- doctor --fix` writes their pins into
+`.config/mise/conf.d/rakko.toml`.
 
 Activate mise in your shell, as the [mise documentation][mise-activate]
 describes. Activation puts the pinned tools on your `PATH`, and with them the
