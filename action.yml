@@ -129,7 +129,7 @@ runs:
         # Without a pin, the action installs the newest release of mise, and a
         # release whose upload failed has no file to download.
         # renovate: datasource=github-releases depName=jdx/mise extractVersion=^v(?<version>.+)$
-        version: 2026.11.7
+        version: 2026.11.8
 
     # The harness fails the step when a problem remains that it cannot
     # repair, such as a toolchain outside the range of an action. The action
