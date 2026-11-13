@@ -1,0 +1,37 @@
+---
+name: Rakko
+
+# An update of Rakko can change the tools that the mounted actions declare.
+# Rakko then stops every command except the help and `doctor` until
+# `doctor --fix` writes the tool pins again. In a pull request of Renovate,
+# the action of this repository runs `doctor --fix` and commits the new tool
+# pins to the branch. The workflow follows the example in the README, but it
+# runs the action of this repository instead of a pinned commit of `main`.
+
+"on":
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: rakko-update-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Update the tool pins
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # The action pushes the new tool pins to the branch.
+
+    steps:
+      # `$/` loads the action from this repository at the commit of the
+      # workflow run. On a pull request, that commit is the merge commit of the
+      # pull request, so each pull request runs its own version of the action.
+      # The first step of the action decides whether to update the pull
+      # request. On the pull request of a person, the action changes nothing,
+      # and its later steps run only on the pull request of a bot.
+      # The action checks out the head commit of the pull request itself.
+      - name: Update the tool pins
+        uses: $/
