@@ -19,9 +19,11 @@ inputs:
   token:
     description: >-
       The credential that checks out the branch of the pull request and pushes
-      the updated tool pins. With the token of the workflow, GitHub runs no CI
-      on the commit until a person approves the run. The token of a GitHub App
-      or a personal access token starts CI without a person.
+      the updated tool pins. With the default GITHUB_TOKEN, each pull_request
+      workflow run that the push starts needs approval from a person with
+      write access. New runs after a rebase need approval again. With a GitHub
+      App token or a personal access token, the push starts these workflows
+      without this approval.
     required: false
     default: ${{ github.token }}
   bots:
