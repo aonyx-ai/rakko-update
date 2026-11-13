@@ -70,8 +70,10 @@ lockfile = true
 # platform outside the list writes entries that the next run in CI removes
 # again. The list names the platforms of the private projects of Aonyx: the
 # self-hosted runners of CI, the machines of the contributors, and Renovate,
-# which locks on `linux-x64` when it moves a pin. A project that starts from
-# this template changes the list when its jobs or its contributors move to
+# which locks on `linux-x64` when it moves a pin. In this repository, the
+# workflow in `.github/workflows/rakko-update.yml` needs `linux-x64` too,
+# because the action installs from the lockfile on `ubuntu-latest`, the
+# runner of that workflow. A project that starts from this template changes the list when its jobs or its contributors move to
 # other platforms, and runs `mise lock` in the same pull request.
 lockfile_platforms = ["linux-arm64", "linux-x64", "macos-arm64"]
 
