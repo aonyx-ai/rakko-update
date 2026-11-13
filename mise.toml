@@ -1,8 +1,11 @@
-# Mise provisions every external tool that this repository needs, at the
-# versions that this file pins. The actions of the harness install nothing:
-# each of them resolves its tool through mise and stops when mise reports
-# none, so a pin that is missing here fails a command instead of letting it
-# run against whatever the machine happens to carry.
+# Mise provisions every external tool that this repository needs. This file
+# pins the toolchains, such as Rust and Node.js, and the tools that no action
+# of the harness declares. `mise run rakko -- doctor --fix` writes the pins of
+# the tools that the mounted actions declare into
+# `.config/mise/conf.d/rakko.toml`. The actions of the harness install nothing: each of them resolves
+# its tool through mise and stops when mise reports none. An action skips on a
+# platform that the declaration of its tool leaves out, such as zizmor on
+# Windows on ARM.
 
 [tools]
 # Mise builds a tool of the cargo backend from source, unless cargo-binstall is
@@ -39,29 +42,18 @@ rust = [
   ] },
 ]
 
-"cargo:cargo-deny" = "0.20.2"
-"cargo:cargo-nextest" = "0.9.151"
-"cargo:cargo-udeps" = "0.1.61"
-
 jq = "1.8.2"
-"npm:markdownlint-cli" = "0.50.0"
 # The release of pre-commit is a Python zipapp, and the registry maps that
 # file to no Windows download, so the pin names the backend that installs
 # from the package index instead and works on every platform.
 "pipx:pre-commit" = "4.7.0"
-"npm:prettier" = "3.9.10"
-"npm:renovate" = "44.222.5"
-taplo = "0.10.0"
 
 # The pin below installs no tool that an action runs. The registry maps
-# pre-commit above and yamllint below to the package index of Python, and the
-# backend that installs from it reaches for uvx when uv is one of the tools
-# that mise provisions, and for pipx when it is not. Not every machine carries
-# pipx, so without this pin the provisioning can stop at those two.
+# pre-commit above and the yamllint of `lint-yaml` to the package index of
+# Python. The backend that installs from that index uses uvx when mise
+# provisions uv, and pipx when it does not. Not every machine has pipx, so
+# without this pin the provisioning can stop at those two.
 uv = "0.13.8"
-
-yamllint = "1.38.0"
-zizmor = "1.32.0"
 
 [settings]
 # The lockfile records the version, the download, and the checksum that each

@@ -6,16 +6,18 @@
 //! into a command. A bundle carries a set of actions that projects adopt
 //! together, so the harness names the bundle instead of each action in it.
 //!
-//! It also mounts commands, for a maintenance activity that no single action
-//! describes. A command comes from a crate, as an action does, and this file
-//! names it. When a command runs actions, this file names those actions as
-//! well and gives them to the command.
+//! Each action pins the tools that it runs, and `doctor --fix` writes the pins
+//! of the mounted actions into `.config/mise/conf.d/rakko.toml`. So a change to
+//! what this file mounts can change the tools that mise installs.
+//!
+//! It also mounts groups, such as pre-commit. A group is a name and a list of
+//! actions that the command line runs as one command. This file gives each
+//! group its list.
 //!
 //! Run it with `mise run rakko`, or with `rakko` where the environment
 //! supplies the shortcut.
 
-use rakko_action::ErasedAction;
-use rakko_cli::ErasedCommand;
+use rakko::Bundle;
 use rakko_format_json::FormatJson;
 use rakko_format_markdown::FormatMarkdown;
 use rakko_format_rust::FormatRust;
@@ -31,51 +33,42 @@ use rakko_test_rust::TestRust;
 
 /// Builds the command line of this repository and runs it
 ///
-/// The call ends the process itself, so a harness stays a `main` that names
-/// what the repository mounts and returns nothing.
-///
 /// The only Rust in the template is this harness, which is a binary, so it
 /// mounts the binary bundle beside the baseline. A project that grows out of
 /// the template and publishes a library swaps it for the library bundle,
 /// which contains everything that the binary bundle carries. A harness stops
 /// when two bundles give it two actions of one name, so it never mounts both.
-fn main() {
-    let pre_commit = PreCommit::new(actions_that_write().into_iter().chain(actions_that_read()));
+fn main() -> std::process::ExitCode {
+    let pre_commit = PreCommit::new(actions_that_guard_a_commit());
 
     rakko_cli::builder()
         .mount(rakko_baseline::bundle())
         .mount(rakko_rust_binary::bundle())
-        .mount_commands([Box::new(pre_commit) as Box<dyn ErasedCommand>])
-        .run();
+        .mount(pre_commit)
+        .run()
 }
 
-/// Returns the actions that write to the tree before a commit, in their order
-///
-/// A formatter that a project adds can overlap with these in the files that
-/// it writes, and then the last formatter that writes a file decides its
-/// content.
-fn actions_that_write() -> Vec<Box<dyn ErasedAction>> {
-    vec![
-        Box::new(FormatJson),
-        Box::new(FormatMarkdown),
-        Box::new(FormatYaml),
-        Box::new(FormatToml),
-        Box::new(FormatRust),
-    ]
-}
-
-/// Returns the actions that only read the tree before a commit, in their order
+/// Returns the actions that guard a commit
 ///
 /// The list is shorter than the list that the harness mounts. An action such
 /// as `check-latest-deps`, which resolves the dependencies of the project
 /// again, belongs in CI and not in front of every commit.
-fn actions_that_read() -> Vec<Box<dyn ErasedAction>> {
-    vec![
-        Box::new(LintGitHubActions),
-        Box::new(LintMarkdown),
-        Box::new(LintRust),
-        Box::new(LintToml),
-        Box::new(LintYaml),
-        Box::new(TestRust),
-    ]
+///
+/// The pre-commit command runs the actions that write before the actions that
+/// read, so the list needs no order between the two. A formatter that a
+/// project adds can overlap with these in the files that it writes. Then the
+/// last formatter in the list that writes a file decides its content.
+fn actions_that_guard_a_commit() -> Bundle {
+    Bundle::default()
+        .with(FormatJson)
+        .with(FormatMarkdown)
+        .with(FormatYaml)
+        .with(FormatToml)
+        .with(FormatRust)
+        .with(LintGitHubActions)
+        .with(LintMarkdown)
+        .with(LintRust)
+        .with(LintToml)
+        .with(LintYaml)
+        .with(TestRust)
 }

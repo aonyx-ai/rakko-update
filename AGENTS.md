@@ -42,18 +42,24 @@ shaped the way it is. [ADR-001][adr-001] defines the process.
 
 ## Tooling
 
-[Mise] provisions every external tool at the version that `mise.toml` pins.
-Run `mise install` once, and activate mise in your shell so that the tools and
-the stubs in `bin` reach your `PATH`.
+[Mise] provisions every external tool. `mise.toml` pins the toolchains, such
+as Rust and Node.js, and the tools that no action declares.
+`.config/mise/conf.d/rakko.toml` pins the tools that the mounted actions
+declare. Run `mise install` once, and activate
+mise in your shell so that the tools and the stubs in `bin` reach your `PATH`.
 
 [Rakko] provides the maintenance tasks. `tools/rakko` is the harness of this
 repository: a package that mounts the bundles of actions this repository runs,
 and that turns each action into a command. Run `mise run rakko` to list the
 commands, or `rakko` where mise supplies its environment.
 
-- Add an action by mounting it in `tools/rakko/src/main.rs`, and pin the tool
-  it needs in `mise.toml`. Rakko installs nothing, and an action whose tool
-  mise does not report stops instead of passing quietly.
+- Mount a new action in `tools/rakko/src/main.rs`. Then run
+  `mise run rakko -- doctor --fix`. The action declares its tools, and the
+  command writes their pins into `.config/mise/conf.d/rakko.toml` and its
+  lockfile. Do not edit these files. Do not pin a declared tool in
+  `mise.toml`, because `doctor` reports such a pin as an error. While the
+  pins do not match the mounted actions, Rakko stops every command except the
+  help and `doctor`.
 - CI enumerates the commands from the help of the harness and runs each one
   whose name starts with `build-`, `check-`, `format-`, `lint-`, or `test-`,
   so a mounted action with one of these prefixes becomes a required check.
