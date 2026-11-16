@@ -10,24 +10,22 @@ name = "rakko"
 path = "src/main.rs"
 
 [dependencies]
-# Rakko's crates carry no version, so that Renovate follows its default branch
-# and updates `Cargo.lock` with the new rev.
-rakko = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-baseline = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-cli = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-format-json = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-format-markdown = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-format-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-format-toml = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-format-yaml = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-lint-github-actions = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-lint-markdown = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-lint-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-lint-toml = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-lint-yaml = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-pre-commit = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-rust-binary = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
-rakko-test-rust = { git = "https://github.com/aonyx-ai/rakko", rev = "527d36ef3c0fd453ca8d835f97b64e48ffe242ca" }
+aonyx-rakko-baseline = "0.1"
+aonyx-rakko-format-json = "0.1"
+aonyx-rakko-format-markdown = "0.1"
+aonyx-rakko-format-rust = "0.1"
+aonyx-rakko-format-toml = "0.1"
+aonyx-rakko-format-yaml = "0.1"
+aonyx-rakko-lint-github-actions = "0.1"
+aonyx-rakko-lint-markdown = "0.1"
+aonyx-rakko-lint-rust = "0.1"
+aonyx-rakko-lint-toml = "0.1"
+aonyx-rakko-lint-yaml = "0.1"
+aonyx-rakko-pre-commit = "0.1"
+aonyx-rakko-rust-binary = "0.1"
+aonyx-rakko-test-rust = "0.1"
+rakko = "0.1"
+rakko-cli = "0.1"
 
 [lints]
 workspace = true

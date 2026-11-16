@@ -17,19 +17,19 @@
 //! Run it with `mise run rakko`, or with `rakko` where the environment
 //! supplies the shortcut.
 
+use aonyx_rakko_format_json::FormatJson;
+use aonyx_rakko_format_markdown::FormatMarkdown;
+use aonyx_rakko_format_rust::FormatRust;
+use aonyx_rakko_format_toml::FormatToml;
+use aonyx_rakko_format_yaml::FormatYaml;
+use aonyx_rakko_lint_github_actions::LintGitHubActions;
+use aonyx_rakko_lint_markdown::LintMarkdown;
+use aonyx_rakko_lint_rust::LintRust;
+use aonyx_rakko_lint_toml::LintToml;
+use aonyx_rakko_lint_yaml::LintYaml;
+use aonyx_rakko_pre_commit::PreCommit;
+use aonyx_rakko_test_rust::TestRust;
 use rakko::Bundle;
-use rakko_format_json::FormatJson;
-use rakko_format_markdown::FormatMarkdown;
-use rakko_format_rust::FormatRust;
-use rakko_format_toml::FormatToml;
-use rakko_format_yaml::FormatYaml;
-use rakko_lint_github_actions::LintGitHubActions;
-use rakko_lint_markdown::LintMarkdown;
-use rakko_lint_rust::LintRust;
-use rakko_lint_toml::LintToml;
-use rakko_lint_yaml::LintYaml;
-use rakko_pre_commit::PreCommit;
-use rakko_test_rust::TestRust;
 
 /// Builds the command line of this repository and runs it
 ///
@@ -42,8 +42,8 @@ fn main() -> std::process::ExitCode {
     let pre_commit = PreCommit::new(actions_that_guard_a_commit());
 
     rakko_cli::builder()
-        .mount(rakko_baseline::bundle())
-        .mount(rakko_rust_binary::bundle())
+        .mount(aonyx_rakko_baseline::bundle())
+        .mount(aonyx_rakko_rust_binary::bundle())
         .mount(pre_commit)
         .run()
 }

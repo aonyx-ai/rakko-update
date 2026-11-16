@@ -5,8 +5,10 @@ name: Rakko
 # Rakko then stops every command except the help and `doctor` until
 # `doctor --fix` writes the tool pins again. In a pull request of Renovate,
 # the action of this repository runs `doctor --fix` and commits the new tool
-# pins to the branch. The workflow follows the example in the README, but it
-# runs the action of this repository instead of a pinned commit of `main`.
+# pins to the branch. It pushes with a token of the GitHub App rakko-update,
+# so the push starts the checks of the pull request without an approval. The
+# workflow follows the example in the README, but it runs the action of this
+# repository instead of a pinned commit of `main`.
 
 "on":
   pull_request:
@@ -22,16 +24,32 @@ jobs:
     name: Update the tool pins
     runs-on: ubuntu-latest
 
+    # The action changes only the pull request of a bot in this repository.
+    # Skip the job for every other pull request, so that the token of the app
+    # is created only where the action can use it. A fork gets no secrets.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["renovate[bot]", "dependabot[bot]"]'), github.event.pull_request.user.login)
+
     permissions:
-      contents: write # The action pushes the new tool pins to the branch.
+      contents: read
 
     steps:
+      - name: Create the token of the app
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          app-id: ${{ secrets.RAKKO_UPDATE_APP_ID }}
+          private-key: ${{ secrets.RAKKO_UPDATE_PRIVATE_KEY }}
+          permission-contents: write
+
       # `$/` loads the action from this repository at the commit of the
       # workflow run. On a pull request, that commit is the merge commit of the
       # pull request, so each pull request runs its own version of the action.
       # The first step of the action decides whether to update the pull
-      # request. On the pull request of a person, the action changes nothing,
-      # and its later steps run only on the pull request of a bot.
+      # request, and its later steps run only on the pull request of a bot.
       # The action checks out the head commit of the pull request itself.
       - name: Update the tool pins
         uses: $/
+        with:
+          token: ${{ steps.app-token.outputs.token }}

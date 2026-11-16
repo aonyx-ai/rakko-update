@@ -16,26 +16,28 @@ this crate.
 
 The harness mounts two bundles:
 
-- [`rakko-baseline`][rakko-baseline] carries the formatters and the linters
-  for the files that any repository holds, whatever language it is written in.
-- [`rakko-rust-binary`][rakko-rust-binary] carries everything that a Rust
-  project runs. The harness is the only Rust in the template, so the bundle
-  formats, lints, and tests the harness itself.
+- [`aonyx-rakko-baseline`][aonyx-rakko-baseline] carries the formatters and the
+  linters for the files that any repository holds, whatever language it is
+  written in.
+- [`aonyx-rakko-rust-binary`][aonyx-rakko-rust-binary] carries everything that
+  a Rust project runs. The harness is the only Rust in the template, so the
+  bundle formats, lints, and tests the harness itself.
 
 A project that grows out of this template and publishes a library mounts
-[`rakko-rust-library`][rakko-rust-library] instead of `rakko-rust-binary`. The
-library bundle contains everything that the binary bundle carries, and a
-harness stops when two bundles give it two actions of one name.
+[`aonyx-rakko-rust-library`][aonyx-rakko-rust-library] instead of
+`aonyx-rakko-rust-binary`. The library bundle contains everything that the
+binary bundle carries, and a harness stops when two bundles give it two actions
+of one name.
 
 ## Commands
 
 ### `pre-commit`
 
-The command comes from [`rakko-pre-commit`][rakko-pre-commit]. It runs the
-actions that guard a commit: the formatters first, in the order in which they
-rewrite the tree, and then the checks that read what they wrote. `src/main.rs`
-gives the command one list of these actions, and the README of the crate
-describes how a run orders them, and when it fails.
+The command comes from [`aonyx-rakko-pre-commit`][aonyx-rakko-pre-commit]. It
+runs the actions that guard a commit: the formatters first, in the order in
+which they rewrite the tree, and then the checks that read what they wrote.
+`src/main.rs` gives the command one list of these actions, and the README of
+the crate describes how a run orders them, and when it fails.
 
 ```console
 mise run rakko -- pre-commit --fix
@@ -57,12 +59,12 @@ so the Rust actions that the harness mounts check it like any other crate. The
 binary is named `rakko`, and the package is named `harness`, because a package
 that depends on the `rakko` crates cannot carry that name as well.
 
-Rakko publishes no release to crates.io yet, so each dependency names the
-repository and the revision that this harness builds. A revision moves in one
-commit, which is what a review of the update reads.
+Each crate of Rakko comes from its release on crates.io. Renovate updates the
+crates, and the workflow in `.github/workflows/rakko-update.yml` then writes
+the tool pins that the new releases declare into the same pull request.
 
+[aonyx-rakko-baseline]: https://github.com/aonyx-ai/rakko/blob/main/bundles/aonyx-rakko-baseline/README.md
+[aonyx-rakko-pre-commit]: https://github.com/aonyx-ai/rakko/blob/main/commands/aonyx-rakko-pre-commit/README.md
+[aonyx-rakko-rust-binary]: https://github.com/aonyx-ai/rakko/blob/main/bundles/aonyx-rakko-rust-binary/README.md
+[aonyx-rakko-rust-library]: https://github.com/aonyx-ai/rakko/blob/main/bundles/aonyx-rakko-rust-library/README.md
 [rakko]: https://github.com/aonyx-ai/rakko
-[rakko-baseline]: https://github.com/aonyx-ai/rakko/blob/main/bundles/rakko-baseline/README.md
-[rakko-pre-commit]: https://github.com/aonyx-ai/rakko/blob/main/commands/rakko-pre-commit/README.md
-[rakko-rust-binary]: https://github.com/aonyx-ai/rakko/blob/main/bundles/rakko-rust-binary/README.md
-[rakko-rust-library]: https://github.com/aonyx-ai/rakko/blob/main/bundles/rakko-rust-library/README.md
