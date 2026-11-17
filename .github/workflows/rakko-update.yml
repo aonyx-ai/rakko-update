@@ -8,7 +8,7 @@ name: Rakko
 # pins to the branch. It pushes with a token of the GitHub App rakko-update,
 # so the push starts the checks of the pull request without an approval. The
 # workflow follows the example in the README, but it runs the action of this
-# repository instead of a pinned commit of `main`.
+# repository instead of a pinned release.
 
 "on":
   pull_request:

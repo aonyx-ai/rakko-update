@@ -52,7 +52,7 @@ of another bot, use the input `bots`. Write one login on each line:
 
 ```yaml
 - name: Update the tool pins
-  uses: aonyx-ai/rakko-update@<commit> # main
+  uses: aonyx-ai/rakko-update@<commit> # v0.1.0
   with:
     bots: |
       my-renovate[bot]
@@ -71,8 +71,8 @@ updates its branch again.
 
 ## Usage
 
-The project must run its harness as `mise run rakko`. It must use a revision
-of Rakko that has the command `doctor`.
+The project must run its harness as `mise run rakko`. It must use Rakko 0.1 or
+later, which has the command `doctor`.
 
 Before you add the action, run `mise run rakko -- doctor --fix` once. Then
 commit the result.
@@ -102,16 +102,19 @@ jobs:
 
     steps:
       - name: Update the tool pins
-        uses: aonyx-ai/rakko-update@<commit> # main
+        uses: aonyx-ai/rakko-update@<commit> # v0.1.0
 ```
 
 The action checks out the branch itself, so the job needs no other step. It
 installs the tools that mise pins for the project, and it builds the harness.
 
-The action has no release yet. Replace `<commit>` with the full hash of a
-commit on `main`. Keep the comment `# main` after the hash. Renovate moves a
-pinned commit only when such a comment gives the branch or the tag that it
-follows.
+Pin the action to a release. Replace `<commit>` with the full hash of the
+commit that the tag of the release points to. Keep the tag in the comment after
+the hash, such as `# v0.1.0`. Renovate moves a pinned commit only when such a
+comment gives the tag that it follows, and it then moves the hash and the
+comment to each new release. A pin to a commit of `main` with the comment
+`# main` falls behind each time `main` moves, and a linter of workflows, such as
+zizmor, then reports the pin.
 
 ### The Lockfile
 
@@ -197,22 +200,44 @@ that merges updates when CI passes then waits for these approvals.
 
 For updates that need no person, use the token of a GitHub App. The app needs
 write access to the contents of the repository. Create a token for the app in
-the job. Then pass the token to the action:
+the job. Then pass the token to the action. The job itself then needs no write
+access:
 
 ```yaml
-steps:
-  - name: Create the token of the app
-    id: app-token
-    uses: actions/create-github-app-token@<commit> # v2
-    with:
-      app-id: ${{ vars.RAKKO_UPDATE_APP_ID }}
-      private-key: ${{ secrets.RAKKO_UPDATE_PRIVATE_KEY }}
+jobs:
+  update:
+    name: Update the tool pins
+    runs-on: ubuntu-latest
 
-  - name: Update the tool pins
-    uses: aonyx-ai/rakko-update@<commit> # main
-    with:
-      token: ${{ steps.app-token.outputs.token }}
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(fromJSON('["renovate[bot]", "dependabot[bot]"]'), github.event.pull_request.user.login)
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Create the token of the app
+        id: app-token
+        uses: actions/create-github-app-token@<commit> # v3.3.0
+        with:
+          client-id: ${{ vars.RAKKO_UPDATE_CLIENT_ID }}
+          private-key: ${{ secrets.RAKKO_UPDATE_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Update the tool pins
+        uses: aonyx-ai/rakko-update@<commit> # v0.1.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 ```
+
+The client ID of the app is not a secret, so a variable holds it.
+`permission-contents: write` limits the token to the access that the action
+needs. The condition `if` skips the job on the pull request of a person and on
+a pull request from a fork. The action changes nothing there, and a pull
+request from a fork gets no secrets, so the step that creates the token would
+fail. When you give more bots in the input `bots`, add their logins to the list
+in the condition too.
 
 A workflow that Dependabot starts can read only the secrets of Dependabot. So
 for Dependabot, store the key of the app as a secret of Dependabot as well.
