@@ -53,7 +53,7 @@ jq = "1.8.2"
 # Python. The backend that installs from that index uses uvx when mise
 # provisions uv, and pipx when it does not. Not every machine has pipx, so
 # without this pin the provisioning can stop at those two.
-uv = "0.13.8"
+uv = "0.13.9"
 
 [settings]
 # The lockfile records the version, the download, and the checksum that each
