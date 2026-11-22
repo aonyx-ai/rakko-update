@@ -14,7 +14,7 @@ concurrency:
 jobs:
   commands:
     name: Enumerate the commands
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: [self-hosted, linux, ARM64, runner-standard]
 
     permissions:
       contents: read
@@ -63,7 +63,15 @@ jobs:
 
   checks:
     name: ${{ matrix.command }}
-    runs-on: [self-hosted, linux, ARM64]
+    # Leave the runners with more memory for the two checks that build and
+    # link the Rust test binaries.
+    runs-on:
+      - self-hosted
+      - linux
+      - ARM64
+      - >-
+        ${{ contains(fromJSON('["test-rust", "check-latest-deps"]'), matrix.command)
+        && 'runner-large' || 'runner-standard' }}
 
     permissions:
       contents: read
@@ -103,7 +111,7 @@ jobs:
 
   success:
     name: All checks succeeded
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: [self-hosted, linux, ARM64, runner-standard]
 
     permissions: {}
 
